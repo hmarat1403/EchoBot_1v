@@ -20,7 +20,7 @@ module Parser
     , getMessageCaptionEntity
     ) where
 
-import Config ( defaultHelpMessage ) 
+import Config ( defaultHelpMessage, defaultStartMessage ) 
 import Users (getUserID, getUsersValue)
 import TelegramAPI 
     ( entities
@@ -70,6 +70,7 @@ checkCommand newResponse =
     let maybeText = (message . head . result $ newResponse) >>= text
         checkJust txt | txt == "/help"           = True
                       | txt == "/repeat"         = True
+                      | txt == "/start"          = True 
                       | txt == "/getMyCommands"  = True
                       | otherwise                = False 
     in maybe False checkJust maybeText
@@ -79,11 +80,11 @@ checkCommandMessage :: TelegramResponse -> Query
 checkCommandMessage newResponse 
         | fromJust maybeText == "/help"           = [("text", Just defaultHelpMessage)]
         | fromJust maybeText == "/repeat"         = [("text", Just BC.empty)]
-        | fromJust maybeText == "/getMyCommands"  = [("text", Just "[/help, /repeat, /getMyCommands]")]
+        | fromJust maybeText == "/start"          = [("text", Just defaultStartMessage)]
+        | fromJust maybeText == "/getMyCommands"  = [("text", Just "[/help, /repeat, /start, /getMyCommands]")]
         | otherwise                               = makeCopyMessage newResponse 
         where maybeText = ((message . head . result $ newResponse) >>= text) 
-                      <|> ((channel_post . head . result $ newResponse) >>= text)
-              
+                      <|> ((channel_post . head . result $ newResponse) >>= text)   
 
                                              
 getSendingMethod :: TelegramResponse -> SendingMethod
@@ -93,6 +94,7 @@ getSendingMethod newResponse = maybe "/sendMessage" parseMessageContent maybeMes
           parseMessageContent input 
             | text input == Just "/help"           = "/sendMessage" 
             | text input == Just "/repeat"         = "/sendMessage"
+            | text input == Just "/start"          = "/sendMessage"
             | text input == Just "/getMyCommands"  = "/sendMessage"
             | otherwise                            = "/copyMessage"
                           

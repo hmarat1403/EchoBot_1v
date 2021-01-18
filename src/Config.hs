@@ -9,7 +9,9 @@ module Config
        , telegramUsers
        , defaultNumberOfMessages
        , helpMessage
+       , startMessage
        , defaultHelpMessage
+       , defaultStartMessage
        , defaultKeyboard
        )  where
 
@@ -64,13 +66,24 @@ helpMessage = do
     then BC.readFile "Help.txt"
     else return defaultHelpMessage
 
+startMessage :: IO BC.ByteString
+startMessage = do 
+    existFile <- doesFileExist "Start.txt"
+    if existFile
+    then BC.readFile "Start.txt"
+    else return defaultStartMessage    
+
 defaultHelpMessage :: BC.ByteString
 defaultHelpMessage = "I am echo-bot. I can send back the received messages\n\
-                  \I accept commands /help and /repeat \n\
-                  \/help displays information about me\n\
-                  \/repeat displays information about the number of\n\
-                  \repeating messages and give you the opportunity\n\
-                  \to change this number in the range from up to 5" 
+                     \I accept commands /help, /repeat, /start and /getMyCommands \n\
+                     \/help - displays information about me\n\
+                     \/start - starting chat\n\
+                     \/repeat - displays information about the number of\n\
+                     \repeating messages and give you the opportunity\n\
+                     \to change this number in the range from up to 5" 
+
+defaultStartMessage :: BC.ByteString 
+defaultStartMessage = "Hello!\nI'm echo-bot. For more info send me command /help"                  
 
 defaultKeyboard :: InlineKeyboardMarkUp
 defaultKeyboard = InlineKeyboardMarkUp { inline_keyboard = 
