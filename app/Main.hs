@@ -20,6 +20,7 @@ import Data.IORef ( writeIORef, newIORef, readIORef )
 import Control.Monad (forever, forM_ )
 import Config (telegramAllowUpdates, telegramOffset, telegramUsers, readToken)
 import Data.Maybe (fromJust, isJust)
+import System.Directory (removeFile, doesFileExist)
 
 
 main :: IO ()
@@ -68,8 +69,12 @@ main = do
                     writeMapToFile "Users.txt" newMap
                     sendMessage decodedUpdate)
                 writeIORef startNumber num
-        else print $ "request failed: code-" <> show code 
-                  <> "; message-" <> show error
-
+        else do 
+            print $ "request failed: code-" <> show code <> "; message-" <> show error
+            existFile <- doesFileExist "Data.txt"
+            if existFile
+            then do removeFile "Data.txt"
+                    main
+            else main 
 
            
